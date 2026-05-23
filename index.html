@@ -2,20 +2,20 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Bowling Buddies: Surf & Skate</title>
 <style>
-*{box-sizing:border-box;user-select:none;touch-action:none}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#05070b;font-family:Arial,sans-serif}
-canvas{width:100vw;height:100dvh;display:block}
-#overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;color:white;padding:18px}
-.panel{background:rgba(0,0,0,.78);border:4px solid white;border-radius:30px;padding:24px;max-width:670px;box-shadow:0 20px 60px #000}
-h1{font-size:clamp(36px,7vw,72px);margin:0}
-p{font-size:clamp(16px,4vw,23px);margin:10px 0}
+*{box-sizing:border-box;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#05070b;font-family:Arial,sans-serif;position:fixed;inset:0}
+canvas{position:fixed;inset:0;width:100vw;height:100dvh;display:block}
+#overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;color:white;padding:16px;z-index:5}
+.panel{background:rgba(0,0,0,.78);border:4px solid white;border-radius:26px;padding:18px;width:min(670px,92vw);max-height:82dvh;overflow:hidden;box-shadow:0 20px 60px #000}
+h1{font-size:clamp(32px,8vw,68px);margin:0}
+p{font-size:clamp(15px,4.5vw,22px);margin:8px 0}
 .goal{color:#ffd33d;font-weight:bold}
-#controls{position:fixed;left:0;right:0;bottom:14px;display:flex;justify-content:space-between;padding:0 16px;pointer-events:none}
+#controls{position:fixed;left:0;right:0;bottom:calc(14px + env(safe-area-inset-bottom));display:flex;justify-content:space-between;padding:0 16px;pointer-events:none;z-index:10}
 .group{display:flex;gap:12px}
-.btn{width:76px;height:76px;border-radius:50%;border:3px solid white;background:rgba(255,255,255,.2);color:white;font-size:34px;font-weight:bold;display:flex;align-items:center;justify-content:center;pointer-events:auto}
+.btn{width:72px;height:72px;border-radius:50%;border:3px solid white;background:rgba(255,255,255,.2);color:white;font-size:32px;font-weight:bold;display:flex;align-items:center;justify-content:center;pointer-events:auto}
 @media(min-width:900px){#controls{display:none}}
 </style>
 </head>
@@ -40,6 +40,17 @@ p{font-size:clamp(16px,4vw,23px);margin:10px 0}
 </div>
 
 <script>
+document.addEventListener("touchmove",e=>e.preventDefault(),{passive:false});
+document.addEventListener("gesturestart",e=>e.preventDefault());
+document.addEventListener("gesturechange",e=>e.preventDefault());
+document.addEventListener("gestureend",e=>e.preventDefault());
+let lastTouchEnd=0;
+document.addEventListener("touchend",e=>{
+  const now=Date.now();
+  if(now-lastTouchEnd<=350)e.preventDefault();
+  lastTouchEnd=now;
+},{passive:false});
+
 const canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
 const overlay=document.getElementById("overlay"),panel=document.getElementById("panel");
 
@@ -84,15 +95,13 @@ let obsTimer=50,itemTimer=70;
 let wipe={x:0,y:0,vy:0,ang:0,spin:0};
 
 const p={x:0,y:0,w:92,h:158,vy:0,jump:false,ground:0};
-
 function ground(){return mode==="skate"?H*.78:H*.58}
 
 function reset(){
   state="play";mode="skate";score=0;stars=0;lives=5;distance=0;speed=6.1;combo=1;
   obs=[];items=[];fx=[];waveFoam=[];obsTimer=45;itemTimer=65;
   p.x=W*.18;p.ground=ground();p.y=p.ground-p.h*S;p.vy=0;p.jump=false;
-  overlay.style.display="none";
-  sound("jump");
+  overlay.style.display="none";sound("jump");
 }
 
 function end(win){
@@ -104,9 +113,8 @@ function end(win){
     <h1>${win?"You Made It!":"WIPEOUT!"}</h1>
     <p>${win?"The pin conquered the street and the sea!":"The buddy took a tumble!"}</p>
     <p class="goal">Final Score: ${score}</p>
-    <p>Stars Collected: ${stars}</p>
-    <p>Best Score: ${best}</p>
-    <p>Goal: beat your score, collect more stars, and survive longer.</p>
+    <p>Stars: ${stars} • Best: ${best}</p>
+    <p>Beat your score, collect more stars, and survive longer.</p>
     <p>Tap anywhere to restart.</p>
   `;
 }
@@ -228,20 +236,17 @@ function bg(){
     ctx.fillStyle="#087fc7";ctx.fillRect(0,H*.32,W,H*.40);
     ctx.fillStyle="#056097";ctx.fillRect(0,H*.53,W,H*.19);
     ctx.fillStyle="#edc679";ctx.fillRect(0,H*.72,W,H*.28);
-
     ctx.strokeStyle="rgba(255,255,255,.9)";ctx.lineWidth=6*S;
     for(let i=0;i<12;i++){
       let x=(i*165-distance*.72)%(W+220)-110;
       let y=H*.55+Math.sin((distance+i*40)/180)*18*S;
       ctx.beginPath();ctx.arc(x,y,60*S,Math.PI,0);ctx.stroke();
     }
-
     ctx.strokeStyle="rgba(255,255,255,.55)";ctx.lineWidth=3*S;
     for(let i=0;i<9;i++){
       let x=(i*230-distance*.35)%(W+260)-130;
       ctx.beginPath();ctx.moveTo(x,H*.43+i%2*35*S);ctx.quadraticCurveTo(x+60*S,H*.40,x+130*S,H*.43+i%2*35*S);ctx.stroke();
     }
-
     ctx.fillStyle="rgba(255,255,255,.25)";ctx.font=`${95*S}px Arial Black`;ctx.fillText("SURF ZONE",W*.2,H*.25);
   }
 }
@@ -249,10 +254,7 @@ function bg(){
 function drawBoardAndPin(x,y,ang){
   let w=p.w*S,h=p.h*S;
   ctx.save();ctx.translate(x+w/2,y+h/2);ctx.rotate(ang);
-
-  ctx.save();
-  ctx.translate(0,h*.53);
-  ctx.rotate(p.jump?Math.sin(Date.now()/80)*.16:Math.sin(Date.now()/160)*.035);
+  ctx.save();ctx.translate(0,h*.53);ctx.rotate(p.jump?Math.sin(Date.now()/80)*.16:Math.sin(Date.now()/160)*.035);
 
   if(mode==="skate"){
     ctx.fillStyle="#d80b34";ctx.strokeStyle="black";ctx.lineWidth=5*S;
@@ -345,9 +347,7 @@ function ui(){
   ctx.fillStyle="#ffd33d";ctx.fillRect(W*.40,32*S,W*.25*Math.min(distance/52000,1),12*S);
 }
 
-function loop(){
-  update();bg();drawObs();drawItems();drawFx();drawPlayer();ui();requestAnimationFrame(loop);
-}
+function loop(){update();bg();drawObs();drawItems();drawFx();drawPlayer();ui();requestAnimationFrame(loop)}
 loop();
 
 function start(){if(state!=="play"&&state!=="wipe")reset()}
