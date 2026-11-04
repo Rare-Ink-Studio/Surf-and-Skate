@@ -1,0 +1,39 @@
+{
+  "repository": "Rare-Ink-Studio/Surf-and-Skate",
+  "visibility": "public",
+  "upstream_branch": "main",
+  "upstream_head": "838d7d957ba8258b9e188f721763f3362912d1b2",
+  "review_branch": "review/game-polish-20261104",
+  "kind": "tested_guest_source_and_focused_patches_not_applied_to_standalone_entrypoint",
+  "description": "Asset readiness, loading recovery and crew/replay controls.",
+  "worker_local_commit": "1053021af8ae2430106863af3ed1c8de6a2e2294",
+  "verified_worker_deployment": "6aeb8095d4fd4fd2652670a1",
+  "latest_site_deployment_reported_by_coordinator": "6aeba652e18e5428ea8a357d",
+  "files": [
+    {
+      "site_path": "play/skate-n-surf/index.html",
+      "archived_source": "source/play/skate-n-surf/index.html",
+      "upstream_path_candidate": "index.html",
+      "before_sha256": "ed42d0dbeb776e994186a5c66c979bfe5e083278cf556f2dd4a973a56a78c2a6",
+      "after_sha256": "05a2c107456052376fbb062f82feab38e24df99d1c07fc2cf5ac89d71c328ca7",
+      "patch": "skate-n-surf__index.html.patch",
+      "patch_sha256": "f6ac28873648f314cc5973e911f09aff269a9283390633dca9af4cd607a62d96",
+      "inline_scripts_before": [
+        "sha256-O5YWtsJT1wOkaSrGusW34W8cG79Pa+yJzKTzw9V4wxk="
+      ],
+      "inline_scripts_after": [
+        "sha256-E1bPA/bBnnyQaKV62rCR7oNsylAG5BhUkLbRxBLX5dE="
+      ]
+    }
+  ],
+  "compatibility_note": "The focused three-way merge into upstream has 9 conflicts. The deployed guest baseline already contains earlier changes absent from upstream. This archive does not choose conflict resolutions or replace the upstream game.",
+  "validation": {
+    "baseline_and_candidate_sha256_verified": true,
+    "javascript_syntax_passed": true,
+    "credential_patterns_found": 0,
+    "full_site_or_operator_material_included": false,
+    "worker_browser_validation": "Passed as described in the local worker handoff; these archived patches have not been ported to the older upstream runtime.",
+    "physical_mobile_or_safari": "Not tested"
+  },
+  "release_state": "REVIEW_BRANCH_ONLY_NO_MERGE_OR_DEPLOY"
+}
